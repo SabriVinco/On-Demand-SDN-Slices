@@ -1,0 +1,36 @@
+body {
+    background-color: #4F6367;
+}
+
+#options-container {
+    display: flex;
+    justify-content: space-around;
+  }
+
+.option-button {
+    width: 100%;
+    height: 50px;
+    border-radius:  10px 10px 0 0;
+    color: white;
+    border: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mode-container {
+    padding: 30px;
+    display: flex;
+    justify-content: space-around;
+    background-color: #B8D8D8;
+}
+
+.mode-button {
+    padding: 10px;
+    border: 0;
+    background-color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    color: #4F6367;
+}
+
+
+

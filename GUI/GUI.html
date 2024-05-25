@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Demand Slicing in Healthcare </title>
+    <script src="GUI.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    <link rel="stylesheet" href="GUI.css">
+</head>
+<body>
+
+    <!-- Automatic or Manual Selection -->
+    <div id="options-container">
+        <button class="option-button" id="option-button-0" onclick="enable_auto()">AUTOMATIC</button>
+        <button class="option-button" id="option-button-1" onclick="enable_manual()">MANUAL</button>
+    </div>
+
+    <div class="mode-container" id="mode-container-automatic">
+        <button class="mode-button" id="auto-button-0">Auto 1</button>
+        <button class="mode-button" id="auto-button-1">Auto 2</button>
+        <button class="mode-button" id="auto-button-2">Auto 3</button>
+    </div>
+
+    <div class="mode-container" id="mode-container-manual">
+        <button class="mode-button" id="manual-button-0" onclick="eel.change_mode('DEFAULT')">Default</button>
+        <button class="mode-button" id="manual-button-1" onclick="eel.change_mode('RADIOLOGY')">Radiology</button>
+        <button class="mode-button" id="manual-button-2" onclick="eel.change_mode('NIGHT')">Night</button>
+    </div>
+
+    <img src="./Images/DEFAULT.png" alt="scenario" id="scenarioImage" style="margin-top: 20px; align-items: center;">
+    
+    <script>
+        eel.expose(change_image);
+        function change_image(scenario){
+            document.getElementById("scenarioImage").src = "./Images/"+scenario+".png"
+        }
+    </script>
+
+</body>
+</html>

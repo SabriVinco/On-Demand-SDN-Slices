@@ -4,26 +4,25 @@ from utils import get_ip, get_all_ip
 def get_night_allowed_routes():
     return {
         #Switch 1
-        1: {
-            get_ip("cd_serv"): { get_ip("back_serv"): 5 },
-            get_ip("back_serv"): { get_ip("cd_serv"): 1 }
-        },
+        1: { },
 
         #Switch 2
         2: {
-            get_ip("back_serv"): { get_ip("cd_serv"): 3, get_ip("rad_serv"): 3 },
-            get_ip("cd_serv"): { get_ip("back_serv"): 2 },
-            get_ip("rad_serv"): { get_ip("back_serv"): 1 }
+            get_ip("back_serv"): { get_ip("ho_serv"): 2 },
+            get_ip("ho_serv"): { get_ip("back_serv"): 1 }
         },
 
         #Switch 3
-        3: {
-            get_ip("rad_serv"): { get_ip("back_serv"): 3 },
-            get_ip("back_serv"): { get_ip("rad_serv"): 2 }
-        },
+        3: { },
 
         #Switch 4
-        4: {  }
+        4: { 
+            get_ip("back_serv"): { get_ip("ho_serv"): 2 },
+            get_ip("ho_serv"): { get_ip("back_serv"): 4 }
+        },
+
+        #Switch 5
+        5: { }
     }
 
 
@@ -41,7 +40,6 @@ def get_night_forbidden_routes():
         get_ip("r2"): get_all_ip(),
 
         get_ip("ent_serv"): get_all_ip(),
-        get_ip("rad_serv"): set(get_all_ip()).difference([ get_ip("back_serv") ]),
-        get_ip("cd_serv"): set(get_all_ip()).difference([ get_ip("back_serv") ]),
-        get_ip("back_serv"): set(get_all_ip()).difference([ get_ip("cd_serv"), get_ip("rad_serv") ])
+        get_ip("ho_serv"): set(get_all_ip()).difference([ get_ip("back_serv") ]),
+        get_ip("back_serv"): set(get_all_ip()).difference([ get_ip("ho_serv") ])
     }

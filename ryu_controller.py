@@ -85,7 +85,7 @@ class Slicing(app_manager.RyuApp):
                 if len(self.switch_datapaths_cache) == len(all_switches()):
 
                     command = [
-                        "./QoS and Queues/QoS.sh",
+                        "./QoS_and_Queues/QoS.sh",
                     ]
 
                     completed = subprocess.run(command, stdout=PIPE, stderr=STDOUT)
@@ -142,7 +142,7 @@ class Slicing(app_manager.RyuApp):
             "ovs-ofctl",
             "add-flow",
             f"s{dpid}",
-            f"ip,priority={priority},nw_src={ip_src},nw_dst={ip_dst},idle_timeout=0,output={port},normal"
+            f"ip,priority={priority},nw_src={ip_src},nw_dst={ip_dst},idle_timeout=0,actions=set_queue:{queue_n},output={port},pop_queue"
         ]
 
         completed = subprocess.run(command, stdout=PIPE, stderr=STDOUT)

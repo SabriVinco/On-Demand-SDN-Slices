@@ -13,9 +13,9 @@ class NetworkTopology(Topo):
 
         Topo.__init__(self)
 
-        gig_net = {}
-        megabit_net = {}
-        host_link_config = {}
+        giga_link = {}
+        mega_link = {}
+        host_link = {}
         
         #Doctors
         d1 = self.addHost(
@@ -80,55 +80,50 @@ class NetworkTopology(Topo):
             mac="00:00:00:00:01:01",
             docker_args={"hostname": "ent_serv"}
         )
-        rad_serv = self.addHost(
-            "rad_serv",
+        ho_serv = self.addHost(
+            "ho_serv",
             cls=DockerHost,
             dimage="dev_test",
             ip="10.0.0.8/24",
             mac="00:00:00:00:01:02",
-            docker_args={"hostname": "rad_serv"}
-        )
-        cd_serv = self.addHost(
-            "cd_serv",
-            cls=DockerHost,
-            dimage="dev_test",
-            ip="10.0.0.9/24",
-            mac="00:00:00:00:01:03",
-            docker_args={"hostname": "cd_serv"}
+            docker_args={"hostname": "ho_serv"}
         )
         back_serv = self.addHost(
             "back_serv",
             cls=DockerHost,
             dimage="dev_test",
-            ip="10.0.0.10/24",
-            mac="00:00:00:00:01:04",
+            ip="10.0.0.9/24",
+            mac="00:00:00:00:01:03",
             docker_args={"hostname": "back_serv"}
         )
         
-        for i in range(4):
+        for i in range(5):
             sconfig = {"dpid": "%016x" % (i + 1)}
             self.addSwitch("s%d" % (i + 1), **sconfig)
 
-        self.addLink("s1", "s2", 1, 2, **gig_net)
-        self.addLink("s2", "s3", 1, 2, **gig_net)
-        self.addLink("s1", "s4", 2, 4, **megabit_net)
+        #Switch links
+        self.addLink("s1", "s4", 1, 1, **giga_link)
+        self.addLink("s4", "s3", 3, 4, **giga_link)
+        self.addLink("s4", "s2", 2, 1, **giga_link)
+        self.addLink("s3", "s5", 3, 1, **mega_link)
+        self.addLink("s1", "s5", 2, 5, **mega_link)
        
-        #Doctor slice
-        self.addLink("d1", "s1", 1, 4, **host_link_config)
-        self.addLink("d2", "s1", 1, 3, **host_link_config)
-        self.addLink("cd_serv", "s1", 1, 5, **host_link_config)
+        #Doctor links
+        self.addLink("d1", "s1", 1, 3, **host_link)
+        self.addLink("d2", "s3", 1, 2, **host_link)
 
-        #Patient Slice
-        self.addLink("p1", "s4", 1, 3, **host_link_config)
-        self.addLink("p2", "s4", 1, 1, **host_link_config)
-        self.addLink("ent_serv", "s4", 1, 2, **host_link_config)
+        #Patient links
+        self.addLink("p1", "s5", 1, 4, **host_link)
+        self.addLink("p2", "s5", 1, 2, **host_link)
 
-        #Radiology Slice
-        self.addLink("r1", "s3", 1, 4, **host_link_config)
-        self.addLink("r2", "s3", 1, 1, **host_link_config)
-        self.addLink("rad_serv", "s3", 1, 3, **host_link_config)
+        #Radiology links
+        self.addLink("r1", "s1", 1, 4, **host_link)
+        self.addLink("r2", "s3", 1, 1, **host_link)
 
-        self.addLink("back_serv", "s2", 1, 3, **gig_net)
+        #Server links
+        self.addLink("back_serv", "s2", 1, 2, **giga_link)
+        self.addLink("ho_serv", "s4", 1, 4, **giga_link)
+        self.addLink("ent_serv", "s5", 1, 3, **giga_link)
 
 try:
     if __name__ == "__main__":

@@ -102,8 +102,7 @@ class Slicing(app_manager.RyuApp):
 
     def add_flow(self, datapath, priority, match, actions):
         '''
-            Add flow to the flow table of the selected switch ( by its
-            datapath )
+            Add flow to the flow table of the selected switch
         '''
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -229,8 +228,7 @@ class Slicing(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         '''
-            Main packet handling function. It works by using the predefined
-            topology, based on the actual scenario. 
+            Called every time the controller receives a packet
         '''
         msg = ev.msg
 
@@ -255,13 +253,17 @@ class Slicing(app_manager.RyuApp):
         dst_addr = lv3_pkg.dst
         src_addr = lv3_pkg.src 
 
+        print(f"Packet-in information: [datapath= {datapath}, dpid={dpid}, src={src_addr}, dst={dst_addr}]")
+
         if self.permitted[self.current_scenario] is None or self.prohibited[self.current_scenario] is None:
+            #Error: unknown communications in the current scenario
             return
 
         port_mapping: Dict[int, Dict[str, int]] = self.permitted[self.current_scenario]
         prohibited: Dict[str, Set[str]] = self.prohibited[self.current_scenario]
 
         if src_addr in prohibited and dst_addr in prohibited[src_addr]:
+            print(f"Communication forbidden from {src_addr} to {dst_addr}")
             return 
 
         if dpid in port_mapping:
@@ -274,8 +276,10 @@ class Slicing(app_manager.RyuApp):
                     if src_addr in out_port:
                         out_port = out_port[src_addr]
                     else: 
+                        print(f"Communication unspecified from {src_addr} to {dst_addr}")
                         return
 
+                #Queue usage
                 if isinstance(out_port, Tuple):
                     out_port, queue_id = out_port
 

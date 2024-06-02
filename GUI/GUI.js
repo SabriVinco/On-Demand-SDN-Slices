@@ -19,12 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 
 function reset(){
-    actual_mode = MODE.MANUAL
-    document.getElementById("option-button-0").style.backgroundColor = DEACTIVE_MODE_COLOR;
-    document.getElementById("option-button-1").style.backgroundColor = ACTIVE_MODE_COLOR; 
-    document.getElementById("mode-container-automatic").style.display = 'none';
-    document.getElementById("mode-container-manual").style.display = 'flex';
-    document.getElementById("scenarioImage").src = "./Images/DEFAULT.png"
+    document.getElementById("scenarioImage").src = "./Images/DEFAULT_GUI.svg"
+    active_button("DEFAULT_BUTTON")
 }
 
 function enable_auto(){

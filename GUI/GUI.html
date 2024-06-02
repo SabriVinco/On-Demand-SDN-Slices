@@ -7,34 +7,105 @@
     <script src="GUI.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
     <link rel="stylesheet" href="GUI.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Automatic or Manual Selection -->
-    <div id="options-container">
-        <button class="option-button" id="option-button-0" onclick="enable_auto()">AUTOMATIC</button>
-        <button class="option-button" id="option-button-1" onclick="enable_manual()">MANUAL</button>
+    <div id="column_container">
+        <div class="column left">
+            <div id="mode_container">
+                <div class="mode automatic">
+                    <div>
+                        AUTOMATIC MODE
+                    </div>
+                    <hr width="70%" color="#344953" />
+                    <div style="margin-top: 20px;">
+                        <!-- Rounded switch -->
+                        <label class="switch" id="AUTO_BUTTON">
+                            <input type="checkbox" onclick="toggleAuto()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mode manual">
+                    <div>
+                        MANUAL MODE
+                    </div>
+                    <hr width="70%" color="#344953" />
+                    <div id="button_container" style="margin-top: 5px;">
+                        <button id="DEFAULT_BUTTON" onclick="eel.change_mode('DEFAULT')">DEFAULT</button>
+                        <button id="RADIOLOGY_BUTTON" onclick="eel.change_mode('RADIOLOGY')">RADIOLOGY</button>
+                        <button id="NIGHT_BUTTON" onclick="eel.change_mode('NIGHT')">NIGHT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column middle">
+            <img src="Images/DEFAULT_GUI.svg" id="scenarioImage">
+        </div>
+        <div class="column right">
+            <div class="div upper">
+                CONTROLLER MESSAGES
+                <hr width="70%" color="#738aa4" />
+            </div>
+            <div class="div lower" style="background-color: #344953;">
+                <p id="messages">
+                    Ciao sono il controller
+                </p>
+            </div>
+        </div>
     </div>
-
-    <div class="mode-container" id="mode-container-automatic">
-        <button class="mode-button" id="auto-button-0">Auto 1</button>
-        <button class="mode-button" id="auto-button-1">Auto 2</button>
-        <button class="mode-button" id="auto-button-2">Auto 3</button>
-    </div>
-
-    <div class="mode-container" id="mode-container-manual">
-        <button class="mode-button" id="manual-button-0" onclick="eel.change_mode('DEFAULT')">Default</button>
-        <button class="mode-button" id="manual-button-1" onclick="eel.change_mode('RADIOLOGY')">Radiology</button>
-        <button class="mode-button" id="manual-button-2" onclick="eel.change_mode('NIGHT')">Night</button>
-    </div>
-
-    <img src="./Images/DEFAULT.png" alt="scenario" id="scenarioImage" style="margin-top: 20px; align-items: center;">
     
     <script>
+
+        var AUTO_MODE = false
+
         eel.expose(change_image);
         function change_image(scenario){
-            document.getElementById("scenarioImage").src = "./Images/"+scenario+".png"
+            document.getElementById("scenarioImage").src = "./Images/"+scenario+"_GUI.svg"
+            reset_button("DEFAULT_BUTTON")
+            reset_button("RADIOLOGY_BUTTON")
+            reset_button("NIGHT_BUTTON")
+
+            if(AUTO_MODE === true){
+                document.getElementById("AUTO_BUTTON").dispatchEvent(new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                    }))
+            }
+
+            active_button(scenario+"_BUTTON")
         }
+
+        function active_button(button_name){
+            document.getElementById(button_name).style.color = "#738aa4"
+            document.getElementById(button_name).style.backgroundColor = "#e5f2d3" 
+        }
+
+        function reset_button(button_name){
+            document.getElementById(button_name).style.color = "#e5f2d3"
+            document.getElementById(button_name).style.backgroundColor = "#738aa4"
+        }
+
+        function toggleAuto(){
+            if (AUTO_MODE === false){
+                AUTO_MODE = true
+                reset_button("DEFAULT_BUTTON")
+                reset_button("RADIOLOGY_BUTTON")
+                reset_button("NIGHT_BUTTON")
+            } 
+            else {
+                AUTO_MODE = false
+                active_button("DEFAULT_BUTTON")
+            }
+        }
+
     </script>
 
 </body>

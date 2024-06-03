@@ -53,10 +53,8 @@
                 CONTROLLER MESSAGES
                 <hr width="70%" color="#738aa4" />
             </div>
-            <div class="div lower" style="background-color: #344953;">
-                <p id="messages">
-                    Ciao sono il controller
-                </p>
+            <div class="div lower" id="log_messages" style="background-color: #344953;" contenteditable="false">
+                <textarea id="textarea_log" readonly></textarea>  
             </div>
         </div>
     </div>
@@ -65,8 +63,8 @@
 
         var AUTO_MODE = false
 
-        eel.expose(change_image);
-        function change_image(scenario){
+        eel.expose(change_scenario);
+        function change_scenario(scenario){
             document.getElementById("scenarioImage").src = "./Images/"+scenario+"_GUI.svg"
             reset_button("DEFAULT_BUTTON")
             reset_button("RADIOLOGY_BUTTON")
@@ -81,6 +79,13 @@
             }
 
             active_button(scenario+"_BUTTON")
+        }
+
+
+        eel.expose(write_message);
+        function write_message(message){
+            const textNode = document.createTextNode(message + '\n');
+            document.getElementById("textarea_log").appendChild(textNode);
         }
 
         function active_button(button_name){

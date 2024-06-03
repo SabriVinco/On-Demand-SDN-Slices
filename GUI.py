@@ -1,5 +1,6 @@
 import eel
 import socket
+import threading
 from enum import Enum
 
 TCP_IP = "127.0.0.1"
@@ -10,23 +11,46 @@ class Mode(Enum):
     RADIOLOGY = 1
     NIGHT = 2
 
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
 @eel.expose
 def change_mode(mode): 
-    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #sock.connect((TCP_IP, TCP_PORT))
-
     if mode == "DEFAULT":
-        #sock.sendto(str(Mode.DEFAULT.value).encode("UTF-8"),(TCP_IP, TCP_PORT))
-        eel.change_image("DEFAULT")
+        sock.sendall(str(Mode.DEFAULT.value).encode("utf-8"))
+        eel.change_scenario("DEFAULT")
     elif mode == "RADIOLOGY":
-        #sock.sendto(str(Mode.RADIOLOGY.value).encode("UTF-8"),(TCP_IP, TCP_PORT))
-        eel.change_image("RADIOLOGY")
+        sock.sendall(str(Mode.RADIOLOGY.value).encode("utf-8"))
+        eel.change_scenario("RADIOLOGY")
     elif mode == "NIGHT":
-        #sock.sendto(str(Mode.NIGHT.value).encode("UTF-8"),(TCP_IP, TCP_PORT))
-        eel.change_image("NIGHT")
+        sock.sendall(str(Mode.NIGHT.value).encode("utf-8"))
+        eel.change_scenario("NIGHT")
 
 
-eel.init("GUI")
-eel.start("GUI.html", size=(1200, 500))
+def listen_for_messages():
+    while True:
+        data = sock.recv(1024)
+        if not data:
+            break
+        eel.write_message(data.decode("utf-8"))
+
+
+if __name__ == "__main__":
+
+    sock.connect((TCP_IP, TCP_PORT))
+    print("Connected to the RYU-CONTROLLER")
+
+    # Start the listener thread
+    listener_thread = threading.Thread(target=listen_for_messages, args=())
+    listener_thread.daemon = True
+    listener_thread.start()
+
+    eel.init("GUI")
+    eel.start("GUI.html", size=(1200, 500))
+
+
+
+
+
 
 

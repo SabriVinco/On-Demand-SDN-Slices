@@ -224,10 +224,20 @@ img {
     border-radius: 30px;
 }
 
-#messages {
+#textarea_log {
+    background-color: #3f5864;
+    color: #e5f2d3;
+    border: 1px solid #738aa4;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 40px;
+    width: 90%;
+    height: 100%;
     font-family: "Fira Code", monospace;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
     align-content: baseline;
+    overflow-y: auto;
+    white-space: pre-wrap;
 }

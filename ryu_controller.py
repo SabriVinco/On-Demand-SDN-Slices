@@ -54,6 +54,8 @@ class Slicing(app_manager.RyuApp):
 
         self.current_scenario = Scenario.DEFAULT
 
+        self.conn:socket = None
+
         # Thread per monitoraggio comandi dalla GUI
         self.thread = hub.spawn(self._monitor)
 
@@ -158,12 +160,9 @@ class Slicing(app_manager.RyuApp):
             Flow tables are cleared and the default route is configured
         '''
 
-        # Se falso viene sollevata un'eccezione
         assert scenario == str(Scenario.DEFAULT) or scenario == str(Scenario.RADIOLOGY) or scenario == str(Scenario.NIGHT) 
 
         self.current_scenario = int(scenario)
-
-        # DEBUG: print the value of the scenario
 
         # Per ogni datapath presente nella cache
         for dp_i in self.switch_datapaths_cache:
@@ -194,33 +193,37 @@ class Slicing(app_manager.RyuApp):
         '''
             Secondary thread that manages TCP connections from the GUI
         '''
-
-        # DEBUG: thread starts
-        print("Partito il thread per il monitoraggio dei segnali")
-
-        # Creazione socket e attivazione per l'ascolto
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((self.BIND_ADDRESS, self.BIND_PORT))
-        sock.listen()
-
-        print('Controller in attesa di comandi...')
+        print('\n\nWaiting for the GUI connection...')
+        sock.listen(1)
+        self.conn, addr = sock.accept()
+        print(f"Connected: {self.conn} - {addr} ")
 
         while True:
-            conn, addr = sock.accept()
+            data = self.conn.recv(1024)
+            if not data: 
+                break
+            
+            msg_recv = data.decode("utf-8")
+            if msg_recv == str(Scenario.DEFAULT) or msg_recv == str(Scenario.RADIOLOGY) or msg_recv == str(Scenario.NIGHT):
+                self.init_flows_slice(msg_recv)
+                if(msg_recv == str(Scenario.DEFAULT)):
+                    req_scenario = "DEFAULT"
+                elif(msg_recv == str(Scenario.RADIOLOGY)):
+                    req_scenario = "RADIOLOGY"
+                else:
+                    req_scenario = "NIGHT"
+                    
+            print(f"\nScenario activation request received: {req_scenario}") 
+            self.send_message_to_GUI(f"*** Request received: activate {req_scenario} ***" )
 
-            # DEBUG: arrivata connessione
-            print("Arrivata connessione")
-
-            while True:
-                data = conn.recv(1024)
-                if not data: 
-                    break
                 
-                msg_recv = data.decode("utf-8")
-                if msg_recv == str(Scenario.DEFAULT) or msg_recv == str(Scenario.RADIOLOGY) or msg_recv == str(Scenario.NIGHT):
-                    self.init_flows_slice(msg_recv)
-                    #DEBUG: Attivato scenario richiesto
-                
+    def send_message_to_GUI(self, message):
+            try:
+                self.conn.sendall(message.encode('utf-8'))
+            except Exception as e:
+                print(f"Error in communication with GUI: {e}")
 
 
 

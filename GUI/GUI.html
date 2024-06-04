@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>On-Demand Slicing in Healthcare </title>
-    <script src="GUI.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
     <link rel="stylesheet" href="GUI.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +26,7 @@
                     <div style="margin-top: 20px;">
                         <!-- Rounded switch -->
                         <label class="switch" id="AUTO_BUTTON">
-                            <input type="checkbox" onclick="toggleAuto()">
+                            <input type="checkbox" id="switch_checkbox" onclick="toggle_auto_mode(); eel.change_mode('AUTO')">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -58,33 +57,39 @@
             </div>
         </div>
     </div>
+    </div>
     
     <script>
 
-        var AUTO_MODE = false
+        var AUTO_MODE_ENABLED = false
 
-        eel.expose(change_scenario);
-        function change_scenario(scenario){
-            document.getElementById("scenarioImage").src = "./Images/"+scenario+"_GUI.svg"
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById("scenarioImage").src = "./Images/DEFAULT_GUI.svg"
+            active_button("DEFAULT_BUTTON")
+        })
+
+        eel.expose(change_button);
+        function change_button(scenario){
             reset_button("DEFAULT_BUTTON")
             reset_button("RADIOLOGY_BUTTON")
             reset_button("NIGHT_BUTTON")
 
-            if(AUTO_MODE === true){
-                document.getElementById("AUTO_BUTTON").dispatchEvent(new MouseEvent('click', {
-                    view: window,
-                    bubbles: true,
-                    cancelable: true
-                    }))
+            if(AUTO_MODE_ENABLED === true){
+                document.getElementById("switch_checkbox").checked = false
+                AUTO_MODE_ENABLED = false
             }
 
             active_button(scenario+"_BUTTON")
         }
 
+        eel.expose(change_image)
+        function change_image(scenario){
+            document.getElementById("scenarioImage").src = "./Images/"+scenario+"_GUI.svg"
+        }
 
         eel.expose(write_message);
         function write_message(message){
-            const textNode = document.createTextNode(message + '\n');
+            const textNode = document.createTextNode("> " + message + '\n');
             document.getElementById("textarea_log").appendChild(textNode);
         }
 
@@ -98,17 +103,18 @@
             document.getElementById(button_name).style.backgroundColor = "#738aa4"
         }
 
-        function toggleAuto(){
-            if (AUTO_MODE === false){
-                AUTO_MODE = true
+        function toggle_auto_mode(){
+            if (AUTO_MODE_ENABLED === false){
+                AUTO_MODE_ENABLED = true
                 reset_button("DEFAULT_BUTTON")
                 reset_button("RADIOLOGY_BUTTON")
                 reset_button("NIGHT_BUTTON")
             } 
             else {
-                AUTO_MODE = false
+                AUTO_MODE_ENABLED = false
                 active_button("DEFAULT_BUTTON")
             }
+
         }
 
     </script>

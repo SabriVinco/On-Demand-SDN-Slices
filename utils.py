@@ -2,6 +2,7 @@ class Scenario():
     DEFAULT = 0
     RADIOLOGY = 1
     NIGHT = 2
+    AUTO = 3
 
 def get_ip( hostname: str ):
 

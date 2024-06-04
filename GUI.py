@@ -6,10 +6,11 @@ from enum import Enum
 TCP_IP = "127.0.0.1"
 TCP_PORT = 8083 
 
-class Mode(Enum):
+class Mode():
     DEFAULT = 0
     RADIOLOGY = 1
     NIGHT = 2
+    AUTO = 3
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -17,14 +18,16 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 @eel.expose
 def change_mode(mode): 
     if mode == "DEFAULT":
-        sock.sendall(str(Mode.DEFAULT.value).encode("utf-8"))
-        eel.change_scenario("DEFAULT")
+        sock.sendall(str(Mode.DEFAULT).encode("utf-8"))
+        eel.change_button("DEFAULT")
     elif mode == "RADIOLOGY":
-        sock.sendall(str(Mode.RADIOLOGY.value).encode("utf-8"))
-        eel.change_scenario("RADIOLOGY")
+        sock.sendall(str(Mode.RADIOLOGY).encode("utf-8"))
+        eel.change_button("RADIOLOGY")
     elif mode == "NIGHT":
-        sock.sendall(str(Mode.NIGHT.value).encode("utf-8"))
-        eel.change_scenario("NIGHT")
+        sock.sendall(str(Mode.NIGHT).encode("utf-8"))
+        eel.change_button("NIGHT")
+    elif mode == "AUTO":
+        sock.sendall(str(Mode.AUTO).encode("utf-8"))
 
 
 def listen_for_messages():
@@ -32,7 +35,10 @@ def listen_for_messages():
         data = sock.recv(1024)
         if not data:
             break
-        eel.write_message(data.decode("utf-8"))
+        data_decoded = data.decode("utf-8")
+        eel.write_message(data_decoded)
+        if "enabled" in data_decoded:
+            eel.change_image(data_decoded.split(" ")[0])
 
 
 if __name__ == "__main__":

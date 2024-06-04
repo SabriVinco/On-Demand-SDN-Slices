@@ -13,6 +13,7 @@ from ryu.lib.packet import ether_types
 from ryu.lib import hub
 from mininet.log import info,debug, setLogLevel
 import socket
+import time
 import subprocess
 from subprocess import PIPE, STDOUT, check_output
 import logging
@@ -53,11 +54,13 @@ class Slicing(app_manager.RyuApp):
         self.switch_datapaths_cache = {}
 
         self.current_scenario = Scenario.DEFAULT
+        self.auto_enabled = False
 
         self.conn:socket = None
 
         # Thread per monitoraggio comandi dalla GUI
         self.thread = hub.spawn(self._monitor)
+        self.auto_thread = None
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER) 
     def switch_features_handler(self, ev):
@@ -160,7 +163,9 @@ class Slicing(app_manager.RyuApp):
             Flow tables are cleared and the default route is configured
         '''
 
-        assert scenario == str(Scenario.DEFAULT) or scenario == str(Scenario.RADIOLOGY) or scenario == str(Scenario.NIGHT) 
+        print(f"Scenario={scenario}")
+
+        assert scenario == str(Scenario.DEFAULT) or scenario == str(Scenario.RADIOLOGY) or scenario == str(Scenario.NIGHT)
 
         self.current_scenario = int(scenario)
 
@@ -193,6 +198,7 @@ class Slicing(app_manager.RyuApp):
         '''
             Secondary thread that manages TCP connections from the GUI
         '''
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((self.BIND_ADDRESS, self.BIND_PORT))
         print('\n\nWaiting for the GUI connection...')
@@ -207,17 +213,55 @@ class Slicing(app_manager.RyuApp):
             
             msg_recv = data.decode("utf-8")
             if msg_recv == str(Scenario.DEFAULT) or msg_recv == str(Scenario.RADIOLOGY) or msg_recv == str(Scenario.NIGHT):
-                self.init_flows_slice(msg_recv)
+
+                if self.auto_enabled == True:
+                    hub.kill(self.auto_thread)
+                    self.send_message_to_GUI(f"*** AUTOMATIC MODE OFF ***" )
+                    self.auto_enabled = False
+
                 if(msg_recv == str(Scenario.DEFAULT)):
                     req_scenario = "DEFAULT"
                 elif(msg_recv == str(Scenario.RADIOLOGY)):
                     req_scenario = "RADIOLOGY"
-                else:
+                elif(msg_recv == str(Scenario.NIGHT)):
                     req_scenario = "NIGHT"
-                    
-            print(f"\nScenario activation request received: {req_scenario}") 
-            self.send_message_to_GUI(f"*** Request received: activate {req_scenario} ***" )
+                print(f"\nScenario activation request received: {req_scenario}") 
+                self.send_message_to_GUI(f"{req_scenario} enabled" )
+                self.init_flows_slice(msg_recv)
 
+            if msg_recv == str(Scenario.AUTO):
+                if self.auto_enabled == False:
+                    self.auto_thread = hub.spawn(self.auto_mode)
+                    self.auto_enabled = True
+                else:
+                    hub.kill(self.auto_thread)
+                    self.send_message_to_GUI(f"*** AUTOMATIC MODE OFF ***" )
+                    self.init_flows_slice(str(Scenario.DEFAULT))             
+                    self.send_message_to_GUI(f"DEFAULT enabled" )
+                    self.auto_enabled = False
+
+    def auto_mode(self):
+        self.send_message_to_GUI(f"*** AUTOMATIC MODE ON ***" )
+        while True:
+            # Start DEFAULT
+            self.init_flows_slice(str(Scenario.DEFAULT)) 
+            print(f"Attivato DEFAULT - AUTO") 
+            self.send_message_to_GUI(f"DEFAULT enabled" )
+            time.sleep(10)
+            
+            
+
+            # Start RADIOLOGY
+            self.init_flows_slice(str(Scenario.RADIOLOGY)) 
+            print(f"Attivato RADIOLOGY - AUTO") 
+            self.send_message_to_GUI(f"RADIOLOGY enabled" )
+            time.sleep(10)
+
+            # Start NIGHT
+            self.init_flows_slice(str(Scenario.NIGHT))
+            print(f"Attivato NIGHT - AUTO") 
+            self.send_message_to_GUI(f"NIGHT enabled" )
+            time.sleep(10)
                 
     def send_message_to_GUI(self, message):
             try:

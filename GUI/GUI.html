@@ -89,8 +89,9 @@
 
         eel.expose(write_message);
         function write_message(message){
-            const textNode = document.createTextNode("> " + message + '\n');
+            const textNode = document.createTextNode(message + '\n');
             document.getElementById("textarea_log").appendChild(textNode);
+            document.getElementById("textarea_log").scrollTop = document.getElementById("textarea_log").scrollHeight
         }
 
         function active_button(button_name){

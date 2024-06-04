@@ -163,11 +163,12 @@ class Slicing(app_manager.RyuApp):
             Flow tables are cleared and the default route is configured
         '''
 
-        print(f"Scenario={scenario}")
-
         assert scenario == str(Scenario.DEFAULT) or scenario == str(Scenario.RADIOLOGY) or scenario == str(Scenario.NIGHT)
 
         self.current_scenario = int(scenario)
+
+        if self.conn != None:
+            self.send_message_to_GUI("Slicing policy / mode changed")
 
         # Per ogni datapath presente nella cache
         for dp_i in self.switch_datapaths_cache:
@@ -188,10 +189,16 @@ class Slicing(app_manager.RyuApp):
 
             switch_dp.send_msg(mod)
 
+        if self.conn != None:
+            self.send_message_to_GUI("Flows cleared")
+
         for dp_i in self.switch_datapaths_cache:
             switch_dp = self.switch_datapaths_cache[dp_i]
 
             self._flow_entry_empty(switch_dp)
+        
+        if self.conn != None:
+            self.send_message_to_GUI("Initialized switches")
 
     
     def _monitor(self):
@@ -216,7 +223,7 @@ class Slicing(app_manager.RyuApp):
 
                 if self.auto_enabled == True:
                     hub.kill(self.auto_thread)
-                    self.send_message_to_GUI(f"*** AUTOMATIC MODE OFF ***" )
+                    self.send_message_to_GUI(f"\n*** AUTOMATIC MODE OFF ***" )
                     self.auto_enabled = False
 
                 if(msg_recv == str(Scenario.DEFAULT)):
@@ -225,9 +232,9 @@ class Slicing(app_manager.RyuApp):
                     req_scenario = "RADIOLOGY"
                 elif(msg_recv == str(Scenario.NIGHT)):
                     req_scenario = "NIGHT"
-                print(f"\nScenario activation request received: {req_scenario}") 
-                self.send_message_to_GUI(f"{req_scenario} enabled" )
+                self.send_message_to_GUI(f"Change scenario request received: {req_scenario}" )   
                 self.init_flows_slice(msg_recv)
+                self.send_message_to_GUI(f"{req_scenario} enabled" )
 
             if msg_recv == str(Scenario.AUTO):
                 if self.auto_enabled == False:
@@ -235,31 +242,29 @@ class Slicing(app_manager.RyuApp):
                     self.auto_enabled = True
                 else:
                     hub.kill(self.auto_thread)
-                    self.send_message_to_GUI(f"*** AUTOMATIC MODE OFF ***" )
+                    self.send_message_to_GUI(f"\n*** AUTOMATIC MODE OFF ***" )
                     self.init_flows_slice(str(Scenario.DEFAULT))             
-                    self.send_message_to_GUI(f"DEFAULT enabled" )
+                    self.send_message_to_GUI(f"\nDEFAULT enabled" )
                     self.auto_enabled = False
 
     def auto_mode(self):
-        self.send_message_to_GUI(f"*** AUTOMATIC MODE ON ***" )
+        self.send_message_to_GUI(f"\n*** AUTOMATIC MODE ON ***" )
         while True:
             # Start DEFAULT
             self.init_flows_slice(str(Scenario.DEFAULT)) 
-            print(f"Attivato DEFAULT - AUTO") 
+            time.sleep(0.1)
             self.send_message_to_GUI(f"DEFAULT enabled" )
             time.sleep(10)
             
-            
-
             # Start RADIOLOGY
             self.init_flows_slice(str(Scenario.RADIOLOGY)) 
-            print(f"Attivato RADIOLOGY - AUTO") 
+            time.sleep(0.1)
             self.send_message_to_GUI(f"RADIOLOGY enabled" )
             time.sleep(10)
 
             # Start NIGHT
             self.init_flows_slice(str(Scenario.NIGHT))
-            print(f"Attivato NIGHT - AUTO") 
+            time.sleep(0.1)
             self.send_message_to_GUI(f"NIGHT enabled" )
             time.sleep(10)
                 
@@ -268,9 +273,6 @@ class Slicing(app_manager.RyuApp):
                 self.conn.sendall(message.encode('utf-8'))
             except Exception as e:
                 print(f"Error in communication with GUI: {e}")
-
-
-
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
@@ -300,17 +302,19 @@ class Slicing(app_manager.RyuApp):
         dst_addr = lv3_pkg.dst
         src_addr = lv3_pkg.src 
 
-        print(f"Packet-in information: [datapath= {datapath}, dpid={dpid}, src={src_addr}, dst={dst_addr}]")
+        self.send_message_to_GUI(f"Packet-in information: [src={src_addr}, dst={dst_addr}]")
 
         if self.permitted[self.current_scenario] is None or self.prohibited[self.current_scenario] is None:
             #Error: unknown communications in the current scenario
+            self.send_message_to_GUI(f"Unknown route from {src_addr} to {dst_addr}")
             return
 
         port_mapping: Dict[int, Dict[str, int]] = self.permitted[self.current_scenario]
         prohibited: Dict[str, Set[str]] = self.prohibited[self.current_scenario]
 
         if src_addr in prohibited and dst_addr in prohibited[src_addr]:
-            print(f"Communication forbidden from {src_addr} to {dst_addr}")
+            #print(f"Communication forbidden from {src_addr} to {dst_addr}")
+            self.send_message_to_GUI(f"Communication forbidden from {src_addr} to {dst_addr}")
             return 
 
         if dpid in port_mapping:
@@ -323,7 +327,8 @@ class Slicing(app_manager.RyuApp):
                     if src_addr in out_port:
                         out_port = out_port[src_addr]
                     else: 
-                        print(f"Communication unspecified from {src_addr} to {dst_addr}")
+                        #print(f"Communication unspecified from {src_addr} to {dst_addr}")
+                        self.send_message_to_GUI(f"Communication unspecified from {src_addr} to {dst_addr}")
                         return
 
                 #Queue usage

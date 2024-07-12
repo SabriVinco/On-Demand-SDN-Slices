@@ -230,6 +230,7 @@ class Slicing(app_manager.RyuApp):
                 if self.auto_enabled == True:
                     hub.kill(self.auto_thread)
                     self.send_message_to_GUI(f"\n*** AUTOMATIC MODE OFF ***" )
+                    time.sleep(0.1)
                     self.auto_enabled = False
 
                 if(msg_recv == str(Scenario.DEFAULT)):
@@ -249,6 +250,7 @@ class Slicing(app_manager.RyuApp):
                 else:
                     hub.kill(self.auto_thread)
                     self.send_message_to_GUI(f"\n*** AUTOMATIC MODE OFF ***" )
+                    time.sleep(0.1)
                     self.init_flows_slice(str(Scenario.DEFAULT))             
                     self.send_message_to_GUI(f"\nDEFAULT enabled" )
                     self.auto_enabled = False

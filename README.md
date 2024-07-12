@@ -7,6 +7,7 @@ The goal of the project "On Demand SDN Slicing - Helthcare Application" is to im
 - [Scenario 2 - RADIOLOGY](#scenario-2---radiology)
 - [Scenario 3 - NIGHT](#scenario-3---night)
 - [Automatic Mode](#automatic-mode)
+- [GUI](#gui)
 - [Installation and Configuration](#installation-and-configuration)
 - [How to run](#how-to-run)
 - [Presentation](#presentation)
@@ -117,6 +118,18 @@ To verify the accuracy of the network bandwidth, you can check the bandwidth bet
 
 
 ## Automatic Mode
+Through the GUI you can activate the automatic mode, which allows you to alternate the various modes, simulating an automatic operation for a real context.
+
+<p align="center">
+  <img src="./GUI/Images/auto_mode.png" alt="auto_mode" width="450">
+</p>
+
+## GUI
+<p align="center" text-align="center">
+  <img width="75%" src="./GUI/Images/gui_demo.gif">
+  <br>
+  <span><i>Demo</i></span>
+</p>
 
 ## Project Structure
 ```

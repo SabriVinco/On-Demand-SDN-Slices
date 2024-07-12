@@ -1,5 +1,5 @@
-# On Demand SDN Slices - Healthcare Application
-The goal of the project is to implement a network slicing approach to enable dynamic activation/de-activation of network slices via CLI/GUI commands. 
+# On Demand SDN Slicing - Healthcare Application
+The goal of the project "On Demand SDN Slicing - Helthcare Application" is to implement a Network Slicing approach to enable dynamic activation/de-activation of network slices via CLI/GUI commands. 
 
 ## Table of Contents
 - [Introduction](#Introduction)
@@ -35,22 +35,29 @@ Network resource management can be summarised in three main scenarios, presented
 
 ## Scenario 1 - DEFAULT 
 ### Overview
-This scenario represents the daily base mode for the clinic. On the days when this scenario is enabled, the radiology slice is deactivated, while the doctors can communicate with each other, with the clinical data server, and during breaks, with the entertainment server.
+This scenario represents the daily base mode for the clinic. On the days when this scenario is enabled, the radiology slice is deactivated, while the doctors can communicate with each other and with the clinical data server. During breaks they have access to the entertainment server.
 
-On the other hand, patients can communicate with each other, connect to the entertainment server, but will not have access to the clinic's sensitive information.
+Patients in the waiting room can communicate with each other and connect to the entertainment server, but they will not have access to the clinic's sensitive information.
 
 <p align="center">
   <img src="./GUI/Images/default.svg" alt="default" width="500">
 </p>
 
 ### Tests
+By running `pingall`, you can see which hosts a single host can reach, and the output will display the network structure mentioned earlier.
+
 <p align="left">
   <img src="./GUI/Images/ping_default.png" alt="ping_default" width="300">
 </p>
 
+To verify the accuracy of the network bandwidth, you can check the bandwidth between two hosts via `iperf <host1> <host2>` command.
+This image shows an example of fast link in our network:
+
 <p align="left">
   <img src="./GUI/Images/default_d1_ho.png" alt="default_d1_ho" width="400">
 </p>
+
+While this image shows an example of slow link in our network:
 
 <p align="left">
   <img src="./GUI/Images/default_d1_ent.png" alt="default_d1_ent" width="400">
@@ -60,16 +67,21 @@ On the other hand, patients can communicate with each other, connect to the ente
 
 ## Scenario 2 - RADIOLOGY 
 ### Overview
-On the days when the clinic offers radiology services, the slice consisting of the radiology machines is activated. The doctors can then connect to the machines, the machines can save data to the clinical data server, and they will have more bandwidth and so on.
+On the days when the clinic offers radiology services, the slice consisting of the radiology machines is activated. The doctors can then connect to the machines, the machines can save data to the clinical data server, and more bandwidth will be reserved for them.
 
 <p align="center">
   <img src="./GUI/Images/radiology.svg" alt="radiology" width="500">
 </p>
 
 ### Tests
+By running `pingall`, you can see which hosts a single host can reach, and the output will display the network structure mentioned earlier.
+
 <p align="left">
   <img src="./GUI/Images/ping_radiology.png" alt="ping_radiology" width="300">
 </p>
+
+To verify the accuracy of the network bandwidth, you can check the bandwidth between two hosts via `iperf <host1> <host2>` command.
+This image shows an example of fast link in our network:
 
 <p align="left">
   <img src="./GUI/Images/rad_d1_ho.png" alt="rad_d1_ho" width="400">
@@ -78,6 +90,8 @@ On the days when the clinic offers radiology services, the slice consisting of t
 <p align="left">
   <img src="./GUI/Images/rad_r1_ho.png" alt="rad_r1_ho" width="400">
 </p>
+
+As can be seen from the two images above, the activation of the radiology machines makes it possible for the latter to have a larger bandwidth, thus reducing the one dedicated to doctors.
 
 ## Scenario 3 - NIGHT
 ### Overview
@@ -89,9 +103,13 @@ During the night, it is possible to enable this scenario, where the only active 
 
 
 ### Tests
+By running `pingall`, you can see which hosts a single host can reach, and the output will display the network structure mentioned earlier.
+
 <p align="left">
   <img src="./GUI/Images/ping_night.png" alt="ping_night" width="300">
 </p>
+
+To verify the accuracy of the network bandwidth, you can check the bandwidth between two hosts via `iperf <host1> <host2>` command.
 
 <p align="left">
   <img src="./GUI/Images/night_ho_back.png" alt="night_ho_back" width="450">

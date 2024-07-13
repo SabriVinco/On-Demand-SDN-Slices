@@ -51,7 +51,7 @@ if __name__ == "__main__":
     listener_thread.daemon = True
     listener_thread.start()
 
-    eel.init("GUI")
+    eel.init("Static Content")
     eel.start("GUI.html", size=(1200, 500))
 
 

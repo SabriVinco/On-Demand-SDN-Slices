@@ -174,6 +174,7 @@ For the installation is necessary to:
 5. Once you finish testing the network, safely exit Mininet by using the command `mininet> exit`, followed by `$ sudo mn -c`.
 
 ## Presentation
+https://www.canva.com/design/DAGD-I4bsY0/SNokDYlIApn4beWUs4OEiA/view?utm_content=DAGD-I4bsY0&utm_campaign=designshare&utm_medium=link&utm_source=editor
 
 ## Contributors
 Anna Dal Mas - anna.dalmas@studenti.unitn.it  

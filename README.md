@@ -164,9 +164,7 @@ For the installation is necessary to:
 
 4. To enable Port Forwarding, if using multipass, the command must be run locally: `multipass exec <INSTANCE_NAME> -- sudo iptables -t nat -A PREROUTING -p tcp --dport 8083 -j DNAT --to destination <IP_DESTINATION>:8083`, taking care to modify _INSTANCE_NAME_ and _IP_DESTINATION_ (IP VM) with the correct parameters.
 
-5. In addition, you have to:
-- make sure that on the `./NETWORK/ryu_controller.py` file, the attribute `self.BIND_ADDRESS = <IP>`, has the IP of the local machine
-- make sure that on the `./GUI/GUI.py` file, the attribute `TCP_IP = <IP>`, has the IP of the virtual machine
+5. In addition, you have to make sure that on the `./GUI/GUI.py` file, the attribute `TCP_IP = <IP>`, has the IP of the virtual machine
 
 ## How to run 
 1. Run the controller in Comnetsemu: `$ sudo ryu-manager ryu_controller.py`

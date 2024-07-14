@@ -35,8 +35,6 @@ class Slicing(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
         super(Slicing, self).__init__(*args, **kwargs)        
 
-        self.log_gui = deque()
-
         self.BIND_ADDRESS = "0.0.0.0"
         self.BIND_PORT = 8083
 
@@ -61,14 +59,12 @@ class Slicing(app_manager.RyuApp):
 
         # Thread per monitoraggio comandi dalla GUI
         self.thread = hub.spawn(self._monitor)
-        #self.cli_thread = hub.spawn(self._cli)
         self.auto_thread = None
 
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER) 
     def switch_features_handler(self, ev):
         datapath = ev.msg.datapath
-
         self._flow_entry_empty(datapath)
 
     def _flow_entry_empty(self, datapath):
@@ -92,9 +88,8 @@ class Slicing(app_manager.RyuApp):
 
                 if len(self.switch_datapaths_cache) == len(all_switches()):
 
-                    print('Sto per eseguire il file delle code')
                     command = [
-                        "./QoS.sh",
+                        "./QoS_and_Queue.sh",
                     ]
 
                     completed = subprocess.run(command, stdout=PIPE, stderr=STDOUT)
@@ -169,12 +164,9 @@ class Slicing(app_manager.RyuApp):
 
         assert scenario == str(Scenario.DEFAULT) or scenario == str(Scenario.RADIOLOGY) or scenario == str(Scenario.NIGHT)
 
-        print('Abilito nuovo scenario')
+        print('Enabling new scenario')
 
         self.current_scenario = int(scenario)
-
-       # if self.conn != None:
-            #GUI_MGS : self.send_message_to_GUI("Slicing policy / mode changed")
 
         # Per ogni datapath presente nella cache
         for dp_i in self.switch_datapaths_cache:
@@ -195,16 +187,17 @@ class Slicing(app_manager.RyuApp):
 
             switch_dp.send_msg(mod)
 
-        #if self.conn != None:
-           #GUI_MGS : self.send_message_to_GUI("Flows cleared")
+        if self.conn != None:
+            print("Flows cleared")
+           
 
         for dp_i in self.switch_datapaths_cache:
             switch_dp = self.switch_datapaths_cache[dp_i]
 
             self._flow_entry_empty(switch_dp)
         
-        #if self.conn != None:
-            #GUI_MGS : self.send_message_to_GUI("Initialized switches")
+        if self.conn != None:
+            print("Initialized switches")
 
     
     def _monitor(self):
@@ -312,19 +305,17 @@ class Slicing(app_manager.RyuApp):
         dst_addr = lv3_pkg.dst
         src_addr = lv3_pkg.src 
 
-       #GUI_MGS : self.send_message_to_GUI(f"Packet-in information: [src={src_addr}, dst={dst_addr}]")
+        print(f"Packet-in information: [src={src_addr}, dst={dst_addr}]")
 
         if self.permitted[self.current_scenario] is None or self.prohibited[self.current_scenario] is None:
-            #Error: unknown communications in the current scenario
-          #GUI_MGS :  self.send_message_to_GUI(f"Unknown route from {src_addr} to {dst_addr}")
+            print(f"Unknown route from {src_addr} to {dst_addr}")
             return
 
         port_mapping: Dict[int, Dict[str, int]] = self.permitted[self.current_scenario]
         prohibited: Dict[str, Set[str]] = self.prohibited[self.current_scenario]
 
         if src_addr in prohibited and dst_addr in prohibited[src_addr]:
-            #print(f"Communication forbidden from {src_addr} to {dst_addr}")
-           #GUI_MGS : self.send_message_to_GUI(f"Communication forbidden from {src_addr} to {dst_addr}")
+            print(f"Communication forbidden from {src_addr} to {dst_addr}")
             return 
 
         if dpid in port_mapping:
@@ -337,8 +328,7 @@ class Slicing(app_manager.RyuApp):
                     if src_addr in out_port:
                         out_port = out_port[src_addr]
                     else: 
-                        #print(f"Communication unspecified from {src_addr} to {dst_addr}")
-                       #GUI_MGS : self.send_message_to_GUI(f"Communication unspecified from {src_addr} to {dst_addr}")
+                        print(f"Communication unspecified from {src_addr} to {dst_addr}")
                         return
 
                 #Queue usage
@@ -365,16 +355,6 @@ class Slicing(app_manager.RyuApp):
                     self.add_flow(datapath, 2, match, actions)
                     self._send_package(msg, datapath, in_port, actions)
 
-    # def _cli(self): 
-    #     #Thread per gestione della CLI
-    #     while True:
-    #         user_input = input("*** Enter the scenario  (DEFAULT = 0 | RADIOLOGY = 1 | NIGHT = 2) --> ").strip().upper()
-
-    #         if(user_input == '0' or user_input == '1' or user_input == '2'):
-    #             self.init_flows_slice(user_input)
-    #             print('Scenario ENABLED: ' + user_input)
-    #         else:
-    #             print('Error: unknown command')
 
 
 
